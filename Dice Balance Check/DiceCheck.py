@@ -10,7 +10,7 @@ class DiceCheck(object):
     def __init__(self):
         self.sides = self.getIntFromUser(
             'Please enter the number of sides for the die to be tested.')
-        self.iterationMultiplier = 1
+        self.iterationMultiplier = 3
 
     def testDie(self):
         iterations = self.sides * self.iterationMultiplier
