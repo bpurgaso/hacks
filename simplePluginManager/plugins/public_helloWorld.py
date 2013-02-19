@@ -23,6 +23,8 @@ class public_hello_world(plugin):
 
     def helloWorld(self, at):
         print 'Hello world!'
+        d = decoy()  # testing to ensure I can reference local classes
+        self.getManifest()  # Test to esnure local scope funcs are available
 
     def getManifest(self):
         return [(1, -1, self.helloWorld), (2, 10, self.helloWorld)]

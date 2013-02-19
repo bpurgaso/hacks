@@ -24,6 +24,10 @@ class pluginManager(object):
         self.pluginDirPath = pluginDirPath
         self.verbose = verbose
         sys.path.insert(0, self.pluginDirPath)
+        self.classList, self.registeredPlugins = self.loadPlugins()
+
+    def reloadPlugins(self):
+        self.classList, self.registeredPlugins = self.loadPlugins()
 
     def loadPlugins(self):
         registeredPlugins = defaultdict(lambda: defaultdict(list))
@@ -37,6 +41,7 @@ class pluginManager(object):
                         try:
                             a = obj()
                             for k in a.getManifest():
+                                print 'appending, ', k[2]
                                 registeredPlugins[k[0]][k[1]].append(k[2])
                             classList.append(obj)
                         except Exception, err:
@@ -46,6 +51,16 @@ class pluginManager(object):
 
     def getClassList(self):
         return self.classList
+
+    def executePlugins(self, stage):
+        if self.verbose:
+            print 'executing stage ', stage
+        priorities = self.registeredPlugins[stage].keys()
+        priorities.sort()
+
+        for i in priorities:
+            for func in self.registeredPlugins[stage][i]:
+                func(self.handle)
 
 
 class plugin(object):
@@ -76,9 +91,14 @@ class plugin(object):
 Dummy code to demo the pluginManager
 '''
 if __name__ == '__main__':
-    pm = pluginManager(None)
-    cl, dd = pm.loadPlugins()
-    print "classList:  ", cl
-    for i in dd.keys():
-        for j in dd[i].keys():
-            print i, j, dd[i][j]
+    pm = pluginManager(None, verbose=True)
+    pm.loadPlugins()
+    print '\n\n'
+    print "classList:  ", pm.classList
+    print '--  registered functions  --'
+    for i in pm.registeredPlugins.keys():
+        for j in pm.registeredPlugins[i].keys():
+            print i, j, pm.registeredPlugins[i][j]
+
+    for i in range(0, 5):
+        pm.executePlugins(i)
