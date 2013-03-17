@@ -51,7 +51,8 @@ def timeout(timeout_duration, default_return):
             original_handler = signal.signal(signal.SIGALRM, timeout_handler)
             signal.alarm(timeout_duration)  # Set signal to go off
             try:
-                return_value = f()     # Try to execute the decorated function
+                # Try to execute the decorated function
+                return_value = f(*args, **kwargs)
             except TimeoutException:   # If signal goes off before it completes
                 return default_return  # Return the default value
             finally:
