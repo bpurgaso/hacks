@@ -31,7 +31,7 @@ def timeout(timeout_duration, default_return):
         @param f: Function automatically passed due to timeout() being used as
          a decorator.
         '''
-        def function2(*args):
+        def function2(*args, **kwargs):
             '''
             Acts as a wrapper around function f() from timeout_function.
             Provides all of the setup and teardown required to effectively
