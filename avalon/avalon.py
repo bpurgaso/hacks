@@ -11,7 +11,8 @@ update this codebase with functional code shortly.
 
 
 from couchbase.client import Couchbase
-import json
+import simplejson as json
+from pprint import pprint as pp
 
 
 class Avalon(object):
@@ -22,53 +23,57 @@ class Avalon(object):
 
     def __init__(self,
                  couch='127.0.0.1:8091',
-                 bucket='Avalon',
-                 password='KingArthur'):
+                 uname='username',
+                 bucket='bucket',
+                 password='password'):
         '''
         Constructor
         '''
-        self.__couchbase = Couchbase(couch, bucket, password)
+        self.__couchbase = Couchbase(couch, uname, password)
         self.__bucket = self.__couchbase[bucket]
-        pass
 
-    def set(self, key, value):
-        self.__bucket.set(key, 0, 0, json.dumps(value))
+    def set(self, key, value, expiry=0):
+        print "expiry:  ", expiry
+        return self.__bucket.set(str(key), expiry, 0, json.dumps(value))
 
     def get(self, key):
-        return self.__bucket.get(key)
+        print "KEY: ", key
+        try:
+            tmp = self.__bucket.get(str(key))
+            pp(tmp)
+            t = json.loads(tmp[2])
+            if t is not None:
+                print 'CACHE HIT:  {0}'.format(key)
+                return json.loads(tmp[2])
+        except:
+            pass
+        return ()
 
 
 def createGlobalAvalon():
-    global avalon
-    avalon = Avalon()
+    global AVALON
+    AVALON = Avalon()
 
 
-def cache(duration=0):  # duration support not implemented yet
+def cache(prefix='', expiry=0):  # duration support not implemented yet
     '''
     @param duration: Number of seconds to store in cache, 0 is permanently
     '''
     def function1(f):
 
         def function2(*args, **kwargs):
-            global avalon
-            h = hash(str(args) + str(kwargs))
-            t = avalon.get(h)
+            global AVALON
+            h = prefix + str(hash(str(args) + str(kwargs)))
+            print "GET STARTING with hash:  ", h
+            t = AVALON.get(h)
+            print "GET OK, ", t
             if len(t) > 0:
-                return t[0]  # VERIFY THIS LINE
+                return t  # VERIFY THIS LINE
             else:
                 tmp = f(*args, **kwargs)
-                avalon.set(h, tmp)
+                print AVALON.set(h, tmp, expiry=expiry)
             return tmp
 
         return function2
 
     return function1
-
-
-@cache(duration=0)
-def helloWorld(msg, msg2=''):
-    print "Hello World! " + msg + " " + msg2
-
-### Dummy Code ###
-createGlobalAvalon()
-helloWorld('hiya', msg2='asdfa')
