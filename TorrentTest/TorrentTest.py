@@ -47,6 +47,7 @@ class Client(object):
         for i in self.getUpdateFactory(handle):
             sys.stdout.write(i)
             sys.stdout.flush()
+        print
         print handle.name(), 'complete'
 
 #    def download_magnet(self, link, mode='console'):
