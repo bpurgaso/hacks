@@ -14,11 +14,11 @@ def getUpdateFactory(handle, seed=False):
     while not handle.is_seed() or seed:
         s = handle.status()  # update status
         time.sleep(1)
-        yield progress_string.format(s.progress * 100,
-                                         s.download_rate / 1000,
-                                         s.upload_rate / 1000,
-                                         s.num_peers,
-                                         state_string[s.state])
+        yield '{0: >80}'.format(progress_string.format(s.progress * 100,
+                                                     s.download_rate / 1000,
+                                                     s.upload_rate / 1000,
+                                                     s.num_peers,
+                                                     state_string[s.state]))
 
 state_string = ['queued',
                              'checking',
@@ -29,17 +29,22 @@ state_string = ['queued',
                              'allocating',
                              'checking fastresume']
 
-progress_string = '\r{0:3.2f}% complete (down: {1:.1f}% kb/s up:'\
-                               ' {2:.1f}% kb/s peers: {3}) {4}'
+progress_string = '{0:3.2f}% complete (down: {1:.1f}% kb/s up:'\
+                               ' {2:.1f}% kb/s peers: {3}) {4}\r'
 
 
 tfile_path = './test.torrent'
 files = libtorrent.file_storage()
-libtorrent.add_files(files, './test.jpg')
+libtorrent.add_files(files, './dummy_torrent')
 torrent_file = libtorrent.create_torrent(files)
 libtorrent.set_piece_hashes(torrent_file, ".")
 torrent_file.set_comment('Test torrent1')
 torrent_file.set_creator('bpurgaso')
+
+try:
+    os.remove(tfile_path)
+except OSError:
+    pass
 with open(tfile_path, 'wb') as f:
     f.write(libtorrent.bencode(torrent_file.generate()))
 
