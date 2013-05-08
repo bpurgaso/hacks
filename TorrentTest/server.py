@@ -40,6 +40,8 @@ torrent_file = libtorrent.create_torrent(files)
 libtorrent.set_piece_hashes(torrent_file, ".")
 torrent_file.set_comment('Test torrent1')
 torrent_file.set_creator('bpurgaso')
+# Needs to be changed to correct tracker
+torrent_file.add_tracker('udp://babylon.att.net:6969/announce')
 
 try:
     os.remove(tfile_path)
