@@ -3,52 +3,32 @@
 
 from tabulate import tabulate
 
-'''
-fractal_rewards = {
-        '1-5': {'boss': 15, 'norm': 5},
-        '6-10': {'boss': 20, 'norm': 6},
-        '11-15': {'boss': 25, 'norm': 7},
-        '16-20': {'boss': 30, 'norm': 8},
-        '21-25': {'boss': 35, 'norm': 9},
-        '26-30': {'boss': 40, 'norm': 10},
-        '31-35': {'boss': 45, 'norm': 11},
-        '36-40': {'boss': 50, 'norm': 12},
-        '41-45': {'boss': 55, 'norm': 14},
-        '46-50': {'boss': 60, 'norm': 15}}
-'''
+buy_items = {
+    'prototype_fractal_capacitor': 1350,
+    'gift_of_ascension': 500,
+    '20_slot_fractal_exotic_equipment_box': 250,
+    '20_slot_fractal_rare_equipment_box': 200,
+    '20_slot_fractal_uncommon_equipment_box': 150,
+    'versatile_simple_infusion': 75,
+    'dessas_experimental_journal': 35,
+    'obsidian_shard': 15}
 
-def generate_fractal_rewards(tier_width=5, starting_level=1, tiers=10):
+def generate_fractal_rewards(tier_width=5, max_tier=10, tier_0_award=5):
     fr = {}
-    for i in xrange(starting_level, tier_width*tiers, tier_width):
-        tier_info = {}
-        lower_bound = i - 1
-        cur_tier = lower_bound / tier_width
+    for tier in xrange(max_tier):
+        for level_mod in xrange(tier_width):
+          fractal_level = (tier_width * tier) + level_mod + 1
+          #print fractal_level, ( tier_0_award + tier ) * 4
+          fr[fractal_level] = ( tier_0_award + tier ) * 4
 
-        tier_info['boss'] = cur_tier * 5 + 10
-        tier_info['norm'] = cur_tier + 5
-
-        if cur_tier >= 8:
-            tier_info['norm'] += 1
-
-        fr['{0}-{1}'.format(lower_bound+1, lower_bound+tier_width)] = tier_info
-        fr['0-0'] = tier_info
     return fr
 
-def get_tier_key(fractal_rewards, lvl):
-    for i in fractal_rewards:
-        low, high = i.split('-')
-        low, high = int(low), int(high)
-        if lvl >= low and lvl <= high:
-            return i
-    return '0-0'
-
-
-def count_remaining_runs(fractal_rewards, current_inventory, item_price, starting_f_level=0, target_inventory=250, lvl_cap=48, starting_relics=0):
+def count_remaining_runs(fractal_rewards, current_inventory, item_name, item_price, starting_fractal_level, target_inventory, lvl_cap, starting_relics):
     current_inventory = int(current_inventory)
     togo = target_inventory - current_inventory
-    cur_lvl = starting_f_level
-    f_length = (4, 3)
+    cur_lvl = starting_fractal_level
 
+    print 'Target Item:  {0}'.format(item_name)
     print 'Target Inventory:  {0}'.format(target_inventory)
     print 'Current Inventory:  {0}'.format(current_inventory)
     print 'Needed Inventory:  {0}'.format(togo)
@@ -60,10 +40,7 @@ def count_remaining_runs(fractal_rewards, current_inventory, item_price, startin
 
     while togo > 0:
         runs += 1
-        tkey = get_tier_key(fractal_rewards, cur_lvl)
-        reward += fractal_rewards[tkey]['norm'] * f_length[cur_lvl % 2]
-        if cur_lvl % 2 == 0:
-            reward += fractal_rewards[tkey]['boss']
+        reward += fractal_rewards[cur_lvl]
 
         result.append([runs, cur_lvl, reward, reward / item_price, togo, reward % item_price])
         togo -= reward / item_price
@@ -75,8 +52,24 @@ def count_remaining_runs(fractal_rewards, current_inventory, item_price, startin
     print "Final level", cur_lvl
     return result
 
-
+item_name = 'obsidian_shard'
+#get item cost from table
+item_price = buy_items[item_name]
+current_inventory = 0
+target_inventory = 250
+starting_relics = 0
+starting_fractal_level = 1
+fractal_level_limit = 50
 
 fractal_rewards = generate_fractal_rewards()
-result = count_remaining_runs(fractal_rewards, 217, 15, target_inventory=250, starting_f_level=8, starting_relics=14)
+
+result = count_remaining_runs(
+    fractal_rewards,
+    current_inventory,
+    item_name,
+    item_price,
+    starting_fractal_level,
+    target_inventory,
+    fractal_level_limit,
+    starting_relics)
 print tabulate(result, ['Run', 'Level', 'Relics', 'Target Items', 'Remaining Items', 'Unused Relics'])
