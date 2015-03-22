@@ -2,6 +2,7 @@
 
 
 from tabulate import tabulate
+import argparse
 
 buy_items = {
     'prototype_fractal_capacitor': 1350,
@@ -49,27 +50,42 @@ def count_remaining_runs(fractal_rewards, current_inventory, item_name, item_pri
             cur_lvl += 1
 
     print "Runs remaining: ", runs
-    print "Final level", cur_lvl
+    print "Final fractal level", cur_lvl
     return result
 
-item_name = 'obsidian_shard'
 #get item cost from table
-item_price = buy_items[item_name]
-current_inventory = 0
 target_inventory = 250
 starting_relics = 0
 starting_fractal_level = 1
 fractal_level_limit = 50
 
+parser = argparse.ArgumentParser(description='Calculate how many fractal runs its going to take in order to buy a quantity of items from BUY-4374.')
+parser.add_argument('--item-name', help='The item you want to buy with fractal relics.', required=True)
+parser.add_argument('--current-inventory', default=0, type=int, help='The quantify of your desired item that you already possess.')
+parser.add_argument('--target-inventory', default=1, type=int, help='The total quantity of items you want to possess.')
+parser.add_argument('--starting-fractal-level', default=1, type=int, help='The highest level fractal you can run now.')
+parser.add_argument('--fractal-level-limit', default=50, type=int, help='The highest level fractal you are willing to run.')
+parser.add_argument('--starting_relics', default=0, type=int, help='The number of fractal relics you currently possess.')
+
+args = parser.parse_args()
+try:
+    item_price = buy_items[args.item_name]
+except:
+    print 'Please select your item from one of the following:\n'
+    print '\n'.join(sorted(buy_items.keys()))
+    exit(-1)
+
 fractal_rewards = generate_fractal_rewards()
 
 result = count_remaining_runs(
     fractal_rewards,
-    current_inventory,
-    item_name,
+    args.current_inventory,
+    args.item_name,
     item_price,
-    starting_fractal_level,
-    target_inventory,
-    fractal_level_limit,
-    starting_relics)
+    args.starting_fractal_level,
+    args.target_inventory,
+    args.fractal_level_limit,
+    args.starting_relics)
+
+print
 print tabulate(result, ['Run', 'Level', 'Relics', 'Target Items', 'Remaining Items', 'Unused Relics'])
