@@ -14,15 +14,15 @@ buy_items = {
     'dessas_experimental_journal': 35,
     'obsidian_shard': 15}
 
+
 def generate_fractal_rewards(tier_width=5, max_tier=10, tier_0_award=5):
     fr = {}
     for tier in xrange(max_tier):
         for level_mod in xrange(tier_width):
           fractal_level = (tier_width * tier) + level_mod + 1
-          #print fractal_level, ( tier_0_award + tier ) * 4
           fr[fractal_level] = ( tier_0_award + tier ) * 4
-
     return fr
+
 
 def count_remaining_runs(fractal_rewards, current_inventory, item_name, item_price, starting_fractal_level, target_inventory, lvl_cap, starting_relics):
     current_inventory = int(current_inventory)
